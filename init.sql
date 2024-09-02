@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS users (
 
 INSERT INTO users (username, password, email) VALUES
 ('admin', 'password', 'admin@example.com'),
-('john_doe', 'pass123', 'john@example.com'),
-('jane_smith', 'secret', 'jane@example.com'),
-('bob_johnson', 'secure', 'bob@example.com'),
-('alice_williams', 'p@ssw0rd', 'alice@example.com');
+('alice_williams', 'pass123', 'alice@example.com'),
+('bob_johnson', 'secret', 'bob@example.com'),
+('charlie_smith', 'secure', 'charlie@example.com'),
+('diana_brown', 'p@ssw0rd', 'diana@example.com'),
+('edward_davis', 'secretcode654','edward@example.com');
