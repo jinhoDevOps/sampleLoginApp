@@ -6,46 +6,86 @@
     <meta charset="UTF-8">
     <title>Welcome</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        function refreshDBStatus() {
-            $.get("dbstatus", function(data) {
-                $("#dbStatusContainer").html(data);
-            });
-        }
-        $(document).ready(function() {
-            refreshDBStatus();
+<script>
+    var lastRefreshTime = 0;
+    var refreshInterval = 5000; // 5초
+    var throttleDelay = 1000; // 1초
+
+    function throttle(callback, delay) {
+        return function() {
+            var now = new Date().getTime();
+            if (now - lastRefreshTime < delay) {
+                return;
+            }
+            lastRefreshTime = now;
+            callback.apply(null, arguments);
+        };
+    }
+
+    function refreshDBStatus() {
+        $.ajax({
+            url: "dbstatus",
+            method: "GET",
+            dataType: "json",
+            success: function(data) {
+                $("#dbStatus").text(data.status);
+                $("#currentTime").text(data.time);
+                if (data.status.startsWith("Connected")) {
+                    refreshUserList();
+                } else {
+                    $("#userList").html("<tr><td colspan='2'>Database connection failed. Unable to fetch user list.</td></tr>");
+                }
+            },
+            error: function() {
+                $("#dbStatus").text("Error checking database status");
+                $("#currentTime").text(new Date().toLocaleString("en-US", {timeZone: "Asia/Seoul"}));
+                $("#userList").html("<tr><td colspan='2'>Error checking database status. Unable to fetch user list.</td></tr>");
+            }
         });
-    </script>
+    }
+
+    function refreshUserList() {
+        $.ajax({
+            url: "userlist",
+            method: "GET",
+            dataType: "json",
+            success: function(data) {
+                var userListHtml = "";
+                for (var i = 0; i < data.length; i++) {
+                    userListHtml += "<tr><td>" + data[i].username + "</td><td>" + data[i].email + "</td></tr>";
+                }
+                $("#userList").html(userListHtml);
+            },
+            error: function() {
+                $("#userList").html("<tr><td colspan='2'>Error fetching user list</td></tr>");
+            }
+        });
+    }
+
+    var throttledRefresh = throttle(refreshDBStatus, throttleDelay);
+
+    $(document).ready(function() {
+        refreshDBStatus();
+        setInterval(refreshDBStatus, refreshInterval);
+    });
+</script>
 </head>
 <body>
     <h2>Welcome to the Application!</h2>
-    <div id="dbStatusContainer"></div>
-    <button onclick="refreshDBStatus()">Refresh DB Status</button>
+    <div id="dbStatusContainer">
+        <h3>Database Status</h3>
+        <p>Current Time: <span id="currentTime"></span></p>
+        <p>Status: <span id="dbStatus"></span></p>
+    </div>
+    <button onclick="throttledRefresh()">Refresh DB Status</button>
     <h3>User List</h3>
     <table border="1">
         <tr>
             <th>Username</th>
             <th>Email</th>
         </tr>
-        <%
-            try {
-                Class.forName("com.mysql.cj.jdbc.Driver");
-                Connection conn = DriverManager.getConnection("jdbc:mysql://db:3306/sampledb", "user", "userpassword");
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery("SELECT username, email FROM users");
-                while (rs.next()) {
-                    out.println("<tr>");
-                    out.println("<td>" + rs.getString("username") + "</td>");
-                    out.println("<td>" + rs.getString("email") + "</td>");
-                    out.println("</tr>");
-                }
-                rs.close();
-                stmt.close();
-                conn.close();
-            } catch (Exception e) {
-                out.println("Database error: " + e.getMessage());
-            }
-        %>
+        <tbody id="userList">
+        </tbody>
     </table>
     <form action="logout" method="post">
         <input type="submit" value="Logout">

@@ -25,15 +25,15 @@ public class DBStatusServlet extends HttpServlet {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection conn = DriverManager.getConnection(
-                    "jdbc:mysql://db:3306/sampledb", "user", "userpassword");
+                    "jdbc:mysql://db:3306/sampledb?connectTimeout=5000", "user", "userpassword");
             status = "Connected";
             conn.close();
         } catch (ClassNotFoundException | SQLException e) {
-            status = "Disconnected: " + e.getMessage();
+            status = "Connection failed: " + e.getMessage();
         }
 
-        req.setAttribute("dbStatus", status);
-        req.setAttribute("currentTime", currentTime);
-        req.getRequestDispatcher("/WEB-INF/dbstatus.jsp").forward(req, resp);
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+        resp.getWriter().write("{\"status\":\"" + status + "\",\"time\":\"" + currentTime + "\"}");
     }
 }

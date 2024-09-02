@@ -18,6 +18,7 @@ dependencies {
     implementation 'javax.servlet:jstl:1.2'
     implementation 'mysql:mysql-connector-java:8.0.31'
     testImplementation 'junit:junit:4.13.2'
+    implementation 'org.json:json:20210307'
 }
 
 tasks.withType(JavaCompile).configureEach {
