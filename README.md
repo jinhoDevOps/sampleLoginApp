@@ -143,7 +143,7 @@ volumes:
 ```
 
 ## 5. 배포 방법
-### 5.1 Docker 설치 (CentOS)
+### 5.1 Docker 설치 (RockyOS)
 ```bash
 dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
